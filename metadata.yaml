@@ -1,0 +1,17 @@
+name: cassandra-backup
+summary: Creates local snapshots of cassandra.
+maintainer: Tilman Baumann <tilman.baumann@canonical.com>
+description: |
+  #FIXME
+  Install as subordinate to cassandra servers
+tags:
+  - cassandra
+  - databases
+series:
+    - xenial
+    - trusty
+subordinate: true
+requires:
+  host-system:
+    interface: juju-info
+    scope: container

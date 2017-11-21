@@ -1,0 +1,5 @@
+options:
+  cron-time:
+    type: string
+    default: "0 5 * * *"
+    description: "Cron compatible time string (* * * * *)"
