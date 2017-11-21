@@ -1,1 +1,5 @@
 includes: ['layer:basic']
+options:
+  basic:
+    packages: ['python2.7']
+    use_venv: true

@@ -5,8 +5,7 @@ from shutil import copy
 import os
 
 bin_file_name = "/usr/local/bin/cassandra-backup-only.py"
-cron_format_string = "{} python /usr/local/bin/cassandra-backup-only.py | gawk '{{ print strftime(\"[%Y-%m-%d %H:%M:%S]\"), $0 }}'  >> /var/log/cassandra/backup.log 2>&1\n"
-#0 5 * * * python /usr/local/bin/cassandra-backup-only.py --cassandra_user juju_contrail-configuration --cassandra-password 3gpYTwjwxpB2Y4HZtF8rKhLzcfkPwhfL5gh| gawk '{ print strftime("[%Y-%m-%d %H:%M:%S]"), $0 }'  >> /var/log/cassandra/backup.log 2>&1
+cron_format_string = "{} python2.7 {} | gawk '{{ print strftime(\"[%Y-%m-%d %H:%M:%S]\"), $0 }}'  >> /var/log/cassandra/backup.log 2>&1\n"
 
 
 @when_not('cassandra-backup.installed')
@@ -29,7 +28,7 @@ def write_cron_file():
     cron_time = config['cron-time']
     app_name = hookenv.service_name()
     with open('/etc/cron.d/{}'.format(app_name), 'w') as cron_file:
-        cron_file.write(cron_format_string.format(str(cron_time)))
+        cron_file.write(cron_format_string.format(str(cron_time), bin_file_name))
 
 
 @hook('stop')
