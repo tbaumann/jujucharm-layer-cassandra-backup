@@ -1,4 +1,4 @@
-includes: ['layer:basic']
+includes: ['layer:basic', 'interface:cassandra']
 options:
   basic:
     packages: ['python2.7']

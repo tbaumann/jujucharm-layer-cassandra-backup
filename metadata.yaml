@@ -12,6 +12,6 @@ series:
     - trusty
 subordinate: true
 requires:
-  host-system:
-    interface: juju-info
+  database:
+    interface: cassandra
     scope: container

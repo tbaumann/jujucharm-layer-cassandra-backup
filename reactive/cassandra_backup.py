@@ -1,5 +1,6 @@
-from charms.reactive import when, when_not, set_state, hook
+from charms.reactive import when, when_not, set_state, hook, remove_state, when_any
 from charmhelpers.core.hookenv import service_name, status_set, log
+from charmhelpers.core.unitdata import kv
 from charmhelpers.core import hookenv
 from shutil import copy
 import os
@@ -22,13 +23,41 @@ def started():
     set_state('cassandra-backup.started')
 
 
-@when('config.changed.cron-time')
+@when_any('config.changed.cron-time', 'cassandra-backup.needs-render')
 def write_cron_file():
     config = hookenv.config()
     cron_time = config['cron-time']
     app_name = hookenv.service_name()
+    cache = kv()
     with open('/etc/cron.d/{}'.format(app_name), 'w') as cron_file:
         cron_file.write(cron_format_string.format(str(cron_time), bin_file_name))
+        cron_file.write("# username {}\n".format(cache.get('cassandra-backup.cassandra_user')))
+        cron_file.write("# password {}\n".format(cache.get('cassandra-backup.cassandra_password')))
+    remove_state('cassandra-backup.needs-render')
+
+
+@when('database.connected')
+def db_changed(cassandra):
+    username = ''
+    password = ''
+    cache = kv()
+    log("db_changed Relname: {}".format(cassandra.relation_name))
+    for conv in cassandra.conversations():
+        log("db_changed Conv")
+        username = conv.get_remote('username')
+        password = conv.get_remote('password')
+        log("db_changed Conv host {}".format(conv.get_remote('host')))
+        log("db_changed Conv cluster_name {}".format(conv.get_remote('cluster_name')))
+
+    if username and password:
+        log("Casssandra server uses authentication")
+        cache.set('cassandra-backup.cassandra_user', username)
+        cache.set('cassandra-backup.cassandra_password', password)
+    else:
+        log("Casssandra server doesn't use authentication")
+        cache.unset('cassandra-backup.cassandra_user')
+        cache.unset('cassandra-backup.cassandra_password')
+    set_state('cassandra-backup.needs-render')
 
 
 @hook('stop')
